@@ -1,6 +1,7 @@
 import DashboardLayout from '@/components/common/DashboardLayout';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { CategoryChart } from './components/CategoryChart';
+import { RecentTransactions } from './components/RecentTransactions';
 
 export default function DashboardPage() {
   return (
@@ -40,8 +41,13 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 mt-4 md:grid-cols-1 lg:grid-cols-1">
-        <CategoryChart />
+      <div className="grid gap-4 mt-4 grid-cols-1 lg:grid-cols-5">
+        <div className="lg:col-span-2">
+          <CategoryChart />
+        </div>
+        <div className="lg:col-span-3">
+          <RecentTransactions />
+        </div>
       </div>
     </DashboardLayout>
   );

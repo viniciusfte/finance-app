@@ -1,4 +1,5 @@
-import { Pie, PieChart } from 'recharts';
+import * as React from 'react';
+import { Label, Pie, PieChart } from 'recharts';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,6 +8,8 @@ import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from '@/components/ui/chart';
 
 const receitasData = [
@@ -67,7 +70,22 @@ const despesasConfig = {
   },
 } satisfies ChartConfig;
 
+const formatCurrency = (value: number) => {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+};
+
 export function CategoryChart() {
+  const totalReceitas = React.useMemo(() => {
+    return receitasData.reduce((acc, curr) => acc + curr.amount, 0);
+  }, []);
+
+  const totalDespesas = React.useMemo(() => {
+    return despesasData.reduce((acc, curr) => acc + curr.amount, 0);
+  }, []);
+
   return (
     <Card>
       <Tabs defaultValue="despesas" className="w-full">
@@ -87,7 +105,49 @@ export function CategoryChart() {
               className="mx-auto aspect-square max-h-[300px]"
             >
               <PieChart>
-                <Pie data={receitasData} dataKey="amount" nameKey="category" />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent nameKey="category" hideLabel />}
+                  formatter={(value) => formatCurrency(value as number)}
+                />
+                <Pie
+                  data={receitasData}
+                  dataKey="amount"
+                  nameKey="category"
+                  innerRadius={80}
+                  paddingAngle={2}
+                >
+                  <Label
+                    content={({ viewBox }) => {
+                      if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                        return (
+                          <text
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                          >
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-2xl font-bold"
+                            >
+                              {formatCurrency(totalReceitas)}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 20}
+                              className="fill-muted-foreground text-sm"
+                            >
+                              Total
+                            </tspan>
+                          </text>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </Pie>
                 <ChartLegend
                   content={<ChartLegendContent nameKey="category" />}
                   className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
@@ -101,7 +161,49 @@ export function CategoryChart() {
               className="mx-auto aspect-square max-h-[300px]"
             >
               <PieChart>
-                <Pie data={despesasData} dataKey="amount" nameKey="category" />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent nameKey="category" />}
+                  formatter={(value) => formatCurrency(value as number)}
+                />
+                <Pie
+                  data={despesasData}
+                  dataKey="amount"
+                  nameKey="category"
+                  innerRadius={80}
+                  paddingAngle={2}
+                >
+                  <Label
+                    content={({ viewBox }) => {
+                      if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
+                        return (
+                          <text
+                            x={viewBox.cx}
+                            y={viewBox.cy}
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                          >
+                            <tspan
+                              x={viewBox.cx}
+                              y={viewBox.cy}
+                              className="fill-foreground text-2xl font-bold"
+                            >
+                              {formatCurrency(totalDespesas)}
+                            </tspan>
+                            <tspan
+                              x={viewBox.cx}
+                              y={(viewBox.cy || 0) + 20}
+                              className="fill-muted-foreground text-sm"
+                            >
+                              Total
+                            </tspan>
+                          </text>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </Pie>
                 <ChartLegend
                   content={<ChartLegendContent nameKey="category" />}
                   className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center"
