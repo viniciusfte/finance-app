@@ -5,7 +5,7 @@ import {
   Home,
   Menu,
   Moon,
-  Package2,
+  Search,
   Settings,
   Sun,
   Wallet,
@@ -22,6 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
+import logoImage from '@/assets/images/logo.png';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -38,13 +40,12 @@ interface DashboardLayoutProps {
 const navItems = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
   { label: 'Transações', href: '/transactions', icon: ArrowRightLeft },
-  { label: 'Categorias', href: '/categories', icon: LayoutGrid }, // Linha alterada
+  { label: 'Categorias', href: '/categories', icon: LayoutGrid },
   { label: 'Configurações', href: '/settings', icon: Settings },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { theme, setTheme } = useTheme();
-  const location = useLocation();
   const [isSidebarExpanded, setIsSidebarExpanded] = React.useState(true);
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -57,10 +58,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     `flex flex-col items-center gap-1 rounded-lg p-2 text-xs font-medium transition-colors ${
       isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
     }`;
-    
-  const currentTitle =
-    navItems.find((item) => item.href === location.pathname)?.label ||
-    'Dashboard';
 
   return (
     <TooltipProvider>
@@ -73,9 +70,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         >
           <div className="flex h-full max-h-screen flex-col gap-2 overflow-hidden">
             <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-              <Link to="/" className="flex items-center gap-2 font-semibold">
-                <Package2 className="h-6 w-6" />
-                <span>Fintech</span>
+              <Link to="/" className="flex items-center gap-3 font-semibold">
+                <img src={logoImage} alt="+grana Logo" className="h-6 w-6" />
+                <span>+Grana</span>
               </Link>
             </div>
             <nav className="grid items-start px-2 text-sm font-medium">
@@ -109,12 +106,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
               <span className="sr-only">Alternar menu</span>
             </Button>
-            
-            <div className="sm:hidden">
-              <h1 className="text-lg font-semibold">{currentTitle}</h1>
-            </div>
 
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-4">
+              <div className="relative hidden md:block">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Pesquisar..."
+                  className="rounded-lg bg-background pl-8 w-[200px] lg:w-[300px]"
+                />
+              </div>
+
               <Button
                 variant="outline"
                 size="icon"

@@ -1,80 +1,40 @@
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from '@/components/ui/table';
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import {
-  Briefcase,
-  Home,
-  UtensilsCrossed,
-  HandCoins,
-  Film,
-  Icon,
-} from 'lucide-react';
+import { Transaction } from '@/services/api';
+import { icons } from 'lucide-react';
+import { IconName } from '@/pages/Categories/components/IconPicker';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const mockTransactions = [
-  {
-    id: '1',
-    description: 'Salário Mensal',
-    category: 'Salário',
-    date: '10/06/2025',
-    amount: 5000.0,
-    type: 'receita',
-  },
-  {
-    id: '2',
-    description: 'Aluguel do Apartamento',
-    category: 'Moradia',
-    date: '09/06/2025',
-    amount: 1800.0,
-    type: 'despesa',
-  },
-  {
-    id: '3',
-    description: 'Compras no Supermercado',
-    category: 'Alimentação',
-    date: '08/06/2025',
-    amount: 432.5,
-    type: 'despesa',
-  },
-  {
-    id: '4',
-    description: 'Projeto Freelance X',
-    category: 'Freelance',
-    date: '07/06/2025',
-    amount: 1500.0,
-    type: 'receita',
-  },
-  {
-    id: '5',
-    description: 'Cinema e Jantar',
-    category: 'Lazer',
-    date: '06/06/2025',
-    amount: 175.0,
-    type: 'despesa',
-  },
-];
-
-const categoryIcons: { [key: string]: React.ReactElement<typeof Icon> } = {
-  Salário: <Briefcase size={20} />,
-  Moradia: <Home size={20} />,
-  Alimentação: <UtensilsCrossed size={20} />,
-  Freelance: <HandCoins size={20} />,
-  Lazer: <Film size={20} />,
-};
+interface RecentTransactionsProps {
+  transactions: Transaction[];
+  isLoading: boolean;
+}
 
 const formatCurrency = (value: number) => {
-  return value.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export function RecentTransactions() {
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('pt-BR');
+};
+
+const TransactionSkeleton = () => (
+  <TableRow>
+    <TableCell>
+      <div className="flex items-center gap-4">
+        <Skeleton className="hidden h-10 w-10 rounded-lg sm:flex" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[150px]" />
+          <Skeleton className="h-3 w-[100px]" />
+        </div>
+      </div>
+    </TableCell>
+    <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-full" /></TableCell>
+    <TableCell className="text-right"><Skeleton className="h-4 w-[80px]" /></TableCell>
+  </TableRow>
+);
+
+export function RecentTransactions({ transactions, isLoading }: RecentTransactionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -90,38 +50,40 @@ export function RecentTransactions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>
-                  <div className="flex items-center gap-4">
-                    <div className="flex min-h-10 min-w-10 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
-                      {categoryIcons[transaction.category]}
-                    </div>
-                    <div>
-                      <div className="font-medium">
-                        {transaction.description}
+            {isLoading ? (
+              <>
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+                <TransactionSkeleton />
+              </>
+            ) : (
+              transactions.map((transaction) => {
+                const Icon = transaction.category?.icon ? icons[transaction.category.icon as IconName] : icons['Landmark'];
+                return (
+                  <TableRow key={transaction.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-4">
+                        <div className="hidden h-10 w-10 items-center justify-center rounded-lg bg-secondary text-secondary-foreground sm:flex">
+                          {Icon && <Icon size={20} />}
+                        </div>
+                        <div>
+                          <div className="font-medium">{transaction.description}</div>
+                          <div className="hidden text-sm text-muted-foreground md:inline">
+                            {transaction.category?.name}
+                          </div>
+                        </div>
                       </div>
-                      <div className="hidden text-sm text-muted-foreground md:block">
-                        {transaction.category}
-                      </div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">
-                  {transaction.date}
-                </TableCell>
-                <TableCell
-                  className={`text-right font-medium ${
-                    transaction.type === 'receita'
-                      ? 'text-green-500'
-                      : 'text-red-500'
-                  }`}
-                >
-                  {transaction.type === 'receita' ? '+' : '-'}
-                  {formatCurrency(transaction.amount)}
-                </TableCell>
-              </TableRow>
-            ))}
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{formatDate(transaction.date)}</TableCell>
+                    <TableCell className={`text-right font-medium ${transaction.type === 'receita' ? 'text-green-500' : 'text-red-500'}`}>
+                      {transaction.type === 'receita' ? '+' : '-'}
+                      {formatCurrency(transaction.amount)}
+                    </TableCell>
+                  </TableRow>
+                )
+              })
+            )}
           </TableBody>
         </Table>
       </CardContent>
